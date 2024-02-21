@@ -41,7 +41,7 @@
 		BEC5AD062B85BA6E0028EBE9 = {
 			isa = PBXGroup;
 			children = (
-				BEC5AD112B85BA6E0028EBE9 /* Batch-Process-Scheduling */,
+				BEC5AD122B85BA6E0028EBE9 /* main.c */,
 				BEC5AD102B85BA6E0028EBE9 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -52,14 +52,6 @@
 				BEC5AD0F2B85BA6E0028EBE9 /* Batch-Process-Scheduling */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		BEC5AD112B85BA6E0028EBE9 /* Batch-Process-Scheduling */ = {
-			isa = PBXGroup;
-			children = (
-				BEC5AD122B85BA6E0028EBE9 /* main.c */,
-			);
-			path = "Batch-Process-Scheduling";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
