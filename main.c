@@ -16,9 +16,11 @@ struct node {
     int arrival;
     int startTime;
     int endTime;
-    int cpuTime;
+    int totalCPUTime;
     int turnaroundTime;
     int totalCycleTime;
+    int totalRemainingTime;
+    int alreadyStarted;
     
 }*table = NULL;
 
@@ -61,6 +63,8 @@ void option1(void) {
     }
         
     // print contents of table
+    printSchedulingTable();
+    
     return;
 }
         
@@ -93,47 +97,138 @@ void FIFO(void) {
         
         // set start time, end time, turnaround time, done fields for unscheduled process with earliest arrival time
         table[minArrivalTimeIndex].startTime = max(table[minArrivalTimeIndex].arrival, currentCycle);
-        table[minArrivalTimeIndex].endTime = table[minArrivalTimeIndex].startTime + table[minArrivalTimeIndex].cpuTime;
+        table[minArrivalTimeIndex].endTime = table[minArrivalTimeIndex].startTime + table[minArrivalTimeIndex].totalCPUTime;
         table[minArrivalTimeIndex].turnaroundTime = table[minArrivalTimeIndex].endTime - table[minArrivalTimeIndex].arrival;
         // update current cycle time and increment number of processes scheduled
         currentCycle = table[minArrivalTimeIndex].endTime;
         numberOfProcessesDone++;
         table[minArrivalTimeIndex].done = 1;
     }
+    
     // print contents of table
+    printSchedulingTable();
+    
     return;
 }
 
 
 //*************************************************************
-void option3(void) {
+void SJF(void) {
+    // we can do it another way, first we sort processes with totalCPUTime
+    
     // declare (and initilize when appropriate) local variables
+    int numberOfProcessesDone = 0;
+    int lowestCycle;
+    int minArrivalTimeIndex = 0;
+    int currentCycle = 0;
+    int atLeastOne;
+    
     // for each process, reset "done" field to 0
+    for (int i = 0; i < numberOfProcesses; i++) table[i].done = 0;
+    
     // while there are still processes to schedule
+    while (numberOfProcessesDone < numberOfProcesses){
         // initilize the lowest total cycle time to INT_MAX (largest integer value)
+        lowestCycle = INT_MAX;
+        atLeastOne = 0;
+        
         // for each process not yet scheduled
-            // check if process has lower total cycle time than current lowest and has arrival time less than current cycle time and update
-        // set start time, end time, turnaround time, done fields for unscheduled process with lowest (and available) total cycle time
+        for (int i = 0; i < numberOfProcesses; i++) {
+            if (table[i].done == 0) {
+                // check if process has earlier arrival time than current earliest and update
+                if ((table[i].totalCPUTime < lowestCycle) && (table[i].arrival <= currentCycle)) {
+                    lowestCycle = table[i].totalCPUTime;
+                    minArrivalTimeIndex = i;
+                    // one more thing we gotta do
+                    atLeastOne = 1;
+                }
+            }
+        }
+
+        // check if process has lower total cycle time than current lowest and has arrival time less than current cycle time and update
+        if (atLeastOne == 1){
+            // set start time, end time, turnaround time, done fields for unscheduled process with lowest (and available) total cycle time
+            table[minArrivalTimeIndex].startTime = max(table[minArrivalTimeIndex].arrival, currentCycle);
+            table[minArrivalTimeIndex].endTime = table[minArrivalTimeIndex].startTime + table[minArrivalTimeIndex].totalCPUTime;
+            table[minArrivalTimeIndex].turnaroundTime = table[minArrivalTimeIndex].endTime - table[minArrivalTimeIndex].arrival;
+            // update current cycle time and increment number of processes scheduled
+            currentCycle = table[minArrivalTimeIndex].endTime;
+            numberOfProcessesDone++;
+            table[minArrivalTimeIndex].done = 1;
+        }
         // update current cycle time and increment number of processes scheduled
+        else currentCycle++;
+    }
+    
     // print contents of table
+    printSchedulingTable();
+    
     return;
 }
             
 
 //*************************************************************
-void option4(void) {
+void SRT(void) {
     // declare (and initilize when appropriate) local variables
+    int numberOfProcessesDone = 0;
+    int lowestTotalRemainingTime;
+    int minArrivalTimeIndex = 0;
+    int currentCycle = 0;
+    int atLeastOne;
+    
     // for each process, reset "done", "total_remaining" and "already_started" fields to 0
+    for (int i = 0; i < numberOfProcesses; i++){
+        table[i].done = 0;
+        table[i].alreadyStarted = 0;
+        table[i].totalRemainingTime = table[i].totalCPUTime;
+    }
+    
     // while there are still processes to schedule
+    while (numberOfProcessesDone < numberOfProcesses){
         // initilize the lowest total remaining time to INT_MAX (largest integer value)
+        lowestTotalRemainingTime = INT_MAX;
+        atLeastOne = 0;
+        
         // for each process not yet scheduled
-            // check if process has lower total remaining time than current lowest and has arrival time less than current cycle time and update
-        // check if process already partially-scheduled
-            // if so, set "start time", "already_started" fields of process with lowest (and available) total remaining cycle time
-        // set end time, turnaround time of process with lowest (and available) total remaining cycle time
-        // decrement total remaining time of process with lowest (and available) total remaining cycle time
-        // if remaining time is 0, set done field to 1, increment cycle time and number of scheduled processes
+        for (int i = 0; i < numberOfProcesses; i++) {
+            if (table[i].done == 0) {
+                // check if process has lower total remaining time than current lowest and has arrival time less than current cycle time and update
+                if ((table[i].totalRemainingTime < lowestTotalRemainingTime) && (table[i].arrival <= currentCycle)) {
+                    lowestTotalRemainingTime = table[i].totalCPUTime;
+                    minArrivalTimeIndex = i;
+                    // one more thing we gotta do
+                    atLeastOne = 1;
+                }
+            }
+        }
+            // check if process already partially-scheduled
+            if (atLeastOne == 1){
+                // set start time, end time, turnaround time, done fields for unscheduled process with lowest (and available) total cycle time
+                if (table[minArrivalTimeIndex].alreadyStarted ==0) {
+                    // if so, set "start time", "already_started" fields of process with lowest (and available) total remaining cycle time
+                    table[minArrivalTimeIndex].startTime = max(table[minArrivalTimeIndex].arrival, currentCycle);
+                    table[minArrivalTimeIndex].alreadyStarted = 1;
+                }//if not already started
+                
+                // set end time, turnaround time of process with lowest (and available) total remaining cycle time
+                    table[minArrivalTimeIndex].endTime = currentCycle + 1;
+                    table[minArrivalTimeIndex].turnaroundTime = table[minArrivalTimeIndex].endTime - table[minArrivalTimeIndex].arrival;
+                // decrement total remaining time of process with lowest (and available) total remaining cycle time
+                table[minArrivalTimeIndex].totalRemainingTime--;
+                // if remaining time is 0, set done field to 1, increment cycle time and number of scheduled processes
+                if (table[minArrivalTimeIndex].totalRemainingTime == 0) {
+                    table[minArrivalTimeIndex].done = 1;
+                    numberOfProcessesDone++;
+                }// if process is done
+            }
+            
+            // update current cycle time and increment number of processes scheduled
+            currentCycle++;
+        }
+    
     // print contents of table
+    printSchedulingTable();
+    
     return;
 }
             
@@ -141,6 +236,8 @@ void option4(void) {
 //*************************************************************
 void option5(void) {
     // free the schedule table if not NULL
+    if (table != NULL) free(table);
+
     return;
 }
 
