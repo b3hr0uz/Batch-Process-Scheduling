@@ -34,10 +34,23 @@ void printSchedulingTable(void) {
 //*************************************************************
 void option1(void) {
     // declare local variables
+    int numberOfProcesses = 0;
     // prompt for total number of processes
+    printf("Enter the number of processes: ");
+    scanf("");
+
     // allocate memory for table to hold process parameters
+    table = (table_type *)malloc(numberOfProcesses * sizeof(table_type));
     // for each auto-numbered process (starting from 0):
+    for (int i = 0; i < numberOfProcesses; i++) {
         // prompt for arrival time, and total cycle time
+        printf("Enter arrivaal cycle for process %d: ", i);
+        scanf("%d", &table[i]);
+        printf("\nEnter total cycle time for process %d: ", i);
+        scanf("%d", &table[i]);
+        table[i].id = i;
+    }
+        
     // print contents of table
     return;
 }
