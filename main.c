@@ -97,8 +97,8 @@ void FIFO(void) {
         table[minArrivalTimeIndex].turnaroundTime = table[minArrivalTimeIndex].endTime - table[minArrivalTimeIndex].arrival;
         // update current cycle time and increment number of processes scheduled
         currentCycle = table[minArrivalTimeIndex].endTime;
-                                                   numberOfProcessesDone++;
-                                                   table[minArrivalTimeIndex].done = 1;
+        numberOfProcessesDone++;
+        table[minArrivalTimeIndex].done = 1;
     }
     // print contents of table
     return;
