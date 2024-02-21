@@ -12,10 +12,19 @@
 // declare global variables including a table structure to hold scheduling information
 struct node {
     int id;
+    int done;
+    int arrival;
+    int startTime;
+    int endTime;
+    int cpuTime;
+    int turnaroundTime;
+    int totalCycleTime;
     
 }*table = NULL;
 
 typedef struct node table_type;
+
+int numberOfProcesses;
 
 // optional: define a function that finds the maximum of two integers
 #define max(a,b) (a>b ? a : b)
@@ -34,20 +43,20 @@ void printSchedulingTable(void) {
 //*************************************************************
 void option1(void) {
     // declare local variables
-    int numberOfProcesses = 0;
+
     // prompt for total number of processes
     printf("Enter the number of processes: ");
-    scanf("");
+    scanf("%d", &numberOfProcesses);
 
     // allocate memory for table to hold process parameters
     table = (table_type *)malloc(numberOfProcesses * sizeof(table_type));
     // for each auto-numbered process (starting from 0):
     for (int i = 0; i < numberOfProcesses; i++) {
         // prompt for arrival time, and total cycle time
-        printf("Enter arrivaal cycle for process %d: ", i);
-        scanf("%d", &table[i]);
+        printf("Enter arrival cycle for process %d: ", i);
+        scanf("%d", &table[i].arrival);
         printf("\nEnter total cycle time for process %d: ", i);
-        scanf("%d", &table[i]);
+        scanf("%d", &table[i].totalCycleTime);
         table[i].id = i;
     }
         
@@ -57,15 +66,40 @@ void option1(void) {
         
 
 //*************************************************************
-void option2(void) {
+void FIFO(void) {
     // declare (and initilize when appropriate) local variables
+    int numberOfProcessesDone = 0;
+    int earliestTime;
+    int minArrivalTimeIndex = 0;
+    int currentCycle = 0;
+    
     // for each process, reset "done" field to 0
+    for (int i = 0; i < numberOfProcesses; i++) table[i].done = 0;
+        
     // while there are still processes to schedule
+    while (numberOfProcessesDone < numberOfProcesses){
         // initilize the earliest arrival time to INT_MAX (largest integer value)
+        earliestTime = INT_MAX;
         // for each process not yet scheduled
-            // check if process has earlier arrival time than current earliest and update
+        for (int i = 0; i < numberOfProcesses; i++) {
+            if (table[i].done == 0) {
+                // check if process has earlier arrival time than current earliest and update
+                if (table[i].arrival < earliestTime) {
+                    earliestTime = table[i].arrival;
+                    minArrivalTimeIndex = i;
+                }
+            }
+        }
+        
         // set start time, end time, turnaround time, done fields for unscheduled process with earliest arrival time
+        table[minArrivalTimeIndex].startTime = max(table[minArrivalTimeIndex].arrival, currentCycle);
+        table[minArrivalTimeIndex].endTime = table[minArrivalTimeIndex].startTime + table[minArrivalTimeIndex].cpuTime;
+        table[minArrivalTimeIndex].turnaroundTime = table[minArrivalTimeIndex].endTime - table[minArrivalTimeIndex].arrival;
         // update current cycle time and increment number of processes scheduled
+        currentCycle = table[minArrivalTimeIndex].endTime;
+                                                   numberOfProcessesDone++;
+                                                   table[minArrivalTimeIndex].done = 1;
+    }
     // print contents of table
     return;
 }
