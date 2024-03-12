@@ -268,6 +268,7 @@ int main(void) {
         printf("3) Schedule processes with SJF algorithm\n");
         printf("4) Schedule processes with SRT algorithm\n");
         printf("5) Quit and free memory\n");
+       
         // prompt for menu selection
         printf("Enter selection: ");
         scanf("%d", &choice);
