@@ -21,9 +21,7 @@ struct node {
 //    int totalCycleTime;
     int totalRemainingTime;
     int alreadyStarted;
-    
 }*table = NULL;
-
 typedef struct node table_type;
 
 int numberOfProcesses;
