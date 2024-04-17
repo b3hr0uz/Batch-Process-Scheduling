@@ -18,7 +18,6 @@ struct node {
     int endTime;
     int totalCPUTime;
     int turnaroundTime;
-//    int totalCycleTime;
     int totalRemainingTime;
     int alreadyStarted;
 }*table = NULL;
