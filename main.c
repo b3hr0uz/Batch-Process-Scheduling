@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-// declare global variables including a table structure to hold scheduling information
+// Declare global variables including a table structure to hold scheduling information
 struct node {
     int id;
     int done;
@@ -25,21 +25,21 @@ typedef struct node table_type;
 
 int numberOfProcesses;
 
-// optional: define a function that finds the maximum of two integers
+// Optional: define a function that finds the maximum of two integers
 #define max(a,b) (a>b ? a : b)
 
 //***************************************************************
 void printSchedulingTable(void) {
-    // declare local variables
+    // Declare local variables
     
-    // print table header
+    // Print table header
     printf("\nPID\tArrival\tTotal\tStart\tEnd\t\tTurnaround\tDone\n");
     printf("-----------------------------------------------------\n");
-    // for each process
+    // For each process
     for (int i = 0; i < numberOfProcesses; i++) {
-        // print the contents (id, arrival time, total_cycles) of each field of the table's index
+        // Print the contents (id, arrival time, total_cycles) of each field of the table's index
         printf("%d\t%d\t\t%d\t\t", table[i].id, table[i].arrival, table[i].totalCPUTime);
-        // if process has been scheduled ("done" field is 1, print other contents (start time, end time, turnaround time)
+        // If process has been scheduled ("done" field is 1, print other contents (start time, end time, turnaround time)
         if (table[i].done) { // Only print the rest if the process is done
             printf("%d\t\t%d\t\t%d\t\t\t%d\n", table[i].startTime, table[i].endTime, table[i].turnaroundTime, table[i].done);
         } else {
@@ -51,17 +51,16 @@ void printSchedulingTable(void) {
 
 //*************************************************************
 void option1(void) {
-    // declare local variables
+    // Declare local variables
 
-    // prompt for total number of processes
+    // Prompt for total number of processes
     printf("Enter the number of processes: ");
     scanf("%d", &numberOfProcesses);
-
-    // allocate memory for table to hold process parameters
+    // Allocate memory for table to hold process parameters
     table = (table_type *)malloc(numberOfProcesses * sizeof(table_type));
     // for each auto-numbered process (starting from 0):
     for (int i = 0; i < numberOfProcesses; i++) {
-        // prompt for arrival time, and total cycle time
+        // Prompt for arrival time, and total cycle time
         printf("Enter arrival cycle for process %d: ", i);
         scanf("%d", &table[i].arrival);
         printf("Enter total cycles for process %d: ", i);
@@ -73,76 +72,65 @@ void option1(void) {
         table[i].alreadyStarted = 0; // Necessary for SRT logic
         // No need to initialize start, end, and turnaround times here as they will be set during scheduling
     }
-        
-    // print contents of table after initialization
+    // Print contents of table after initialization
     printSchedulingTable();
-    
     return;
 }
         
 //*************************************************************
 void FIFO(void) {
-    // declare (and initilize when appropriate) local variables
+    // Declare (and initilize when appropriate) local variables
     int numberOfProcessesDone = 0;
     int earliestTime;
     int minArrivalTimeIndex = 0;
     int currentCycle = 0;
-    
-    // for each process, reset "done" field to 0
+    // For each process, reset "done" field to 0
     for (int i = 0; i < numberOfProcesses; i++) table[i].done = 0;
-        
-    // while there are still processes to schedule
+    // While there are still processes to schedule
     while (numberOfProcessesDone < numberOfProcesses){
-        // initilize the earliest arrival time to INT_MAX (largest integer value)
+        // Initilize the earliest arrival time to INT_MAX (largest integer value)
         earliestTime = INT_MAX;
-        // for each process not yet scheduled
+        // For each process not yet scheduled
         for (int i = 0; i < numberOfProcesses; i++) {
             if (table[i].done == 0) {
-                // check if process has earlier arrival time than current earliest and update
+                // Check if process has earlier arrival time than current earliest and update
                 if (table[i].arrival < earliestTime) {
                     earliestTime = table[i].arrival;
                     minArrivalTimeIndex = i;
                 }
             }
         }
-        
-        // set start time, end time, turnaround time, done fields for unscheduled process with earliest arrival time
+        // Set start time, end time, turnaround time, done fields for unscheduled process with earliest arrival time
         table[minArrivalTimeIndex].startTime = max(table[minArrivalTimeIndex].arrival, currentCycle);
         table[minArrivalTimeIndex].endTime = table[minArrivalTimeIndex].startTime + table[minArrivalTimeIndex].totalCPUTime;
         table[minArrivalTimeIndex].turnaroundTime = table[minArrivalTimeIndex].endTime - table[minArrivalTimeIndex].arrival;
-        // update current cycle time and increment number of processes scheduled
+        // Update current cycle time and increment number of processes scheduled
         currentCycle = table[minArrivalTimeIndex].endTime;
         numberOfProcessesDone++;
         table[minArrivalTimeIndex].done = 1;
     }
-    
-    // print contents of table
+    // Print contents of table
     printSchedulingTable();
-    
     return;
 }
 
 //*************************************************************
 void SJF(void) {
-    // we can do it another way, first we sort processes with totalCPUTime
-    
-    // declare (and initilize when appropriate) local variables
+    // We can do it another way: we sort processes with totalCPUTime first.
+    // Declare (and initilize when appropriate) local variables
     int numberOfProcessesDone = 0;
     int lowestCycle;
     int minArrivalTimeIndex = 0;
     int currentCycle = 0;
     int atLeastOne;
-    
-    // for each process, reset "done" field to 0
+    // For each process, reset "done" field to 0
     for (int i = 0; i < numberOfProcesses; i++) table[i].done = 0;
-    
-    // while there are still processes to schedule
+    // While there are still processes to schedule
     while (numberOfProcessesDone < numberOfProcesses){
-        // initilize the lowest total cycle time to INT_MAX (largest integer value)
+        // Initilize the lowest total cycle time to INT_MAX (largest integer value)
         lowestCycle = INT_MAX;
         atLeastOne = 0;
-        
-        // for each process not yet scheduled
+        // For each process not yet scheduled
         for (int i = 0; i < numberOfProcesses; i++) {
             if (table[i].done == 0) {
                 // check if process has earlier arrival time than current earliest and update
@@ -154,51 +142,45 @@ void SJF(void) {
                 }
             }
         }
-
-        // check if process has lower total cycle time than current lowest and has arrival time less than current cycle time and update
+        // Check if process has lower total cycle time than current lowest and has arrival time less than current cycle time and update
         if (atLeastOne == 1){
-            // set start time, end time, turnaround time, done fields for unscheduled process with lowest (and available) total cycle time
+            // Set start time, end time, turnaround time, done fields for unscheduled process with lowest (and available) total cycle time
             table[minArrivalTimeIndex].startTime = max(table[minArrivalTimeIndex].arrival, currentCycle);
             table[minArrivalTimeIndex].endTime = table[minArrivalTimeIndex].startTime + table[minArrivalTimeIndex].totalCPUTime;
             table[minArrivalTimeIndex].turnaroundTime = table[minArrivalTimeIndex].endTime - table[minArrivalTimeIndex].arrival;
-            // update current cycle time and increment number of processes scheduled
+            // Update current cycle time and increment number of processes scheduled
             currentCycle = table[minArrivalTimeIndex].endTime;
             numberOfProcessesDone++;
             table[minArrivalTimeIndex].done = 1;
         }
-        // update current cycle time and increment number of processes scheduled
+        // Update current cycle time and increment number of processes scheduled
         else currentCycle++;
     }
-    
-    // print contents of table
+    // Print contents of table
     printSchedulingTable();
-    
     return;
 }
             
 //*************************************************************
 void SRT(void) {
-    // declare (and initialize when appropriate) local variables
+    // Declare (and initialize when appropriate) local variables
     int numberOfProcessesDone = 0;
     int lowestTotalRemainingTime;
     int minArrivalTimeIndex = -1;
     int currentCycle = 0;
     int atLeastOne;
-    
-    // for each process, reset "done", "total_remaining" and "already_started" fields to 0
+    // For each process, reset "done", "total_remaining" and "already_started" fields to 0
     for (int i = 0; i < numberOfProcesses; i++){
         table[i].done = 0;
         table[i].alreadyStarted = 0;
         table[i].totalRemainingTime = table[i].totalCPUTime;
     }
-    
-    // while there are still processes to schedule
+    // While there are still processes to schedule
     while (numberOfProcessesDone < numberOfProcesses){
         // initialize the lowest total remaining time to INT_MAX (largest integer value)
         lowestTotalRemainingTime = INT_MAX;
         atLeastOne = 0;
-        
-        // for each process not yet scheduled
+        // For each process not yet scheduled
         for (int i = 0; i < numberOfProcesses; i++) {
             if (table[i].done == 0 && table[i].arrival <= currentCycle) {
                 // check if process has lower total remaining time than current lowest and update
@@ -209,20 +191,18 @@ void SRT(void) {
                 }
             }
         }
-        // check if process already partially-scheduled
+        // Check if process already partially-scheduled
         if (atLeastOne == 1){
-            // if not already started
+            // If not already started
             if (table[minArrivalTimeIndex].alreadyStarted == 0) {
-                // set "start time" and "already_started" fields of process with lowest (and available) total remaining cycle time
+                // Set "start time" and "already_started" fields of process with lowest (and available) total remaining cycle time
                 table[minArrivalTimeIndex].startTime = currentCycle;
                 table[minArrivalTimeIndex].alreadyStarted = 1;
             }
-            
             // Process for one cycle
             table[minArrivalTimeIndex].totalRemainingTime--;
             currentCycle++; // Increment current cycle
-            
-            // if remaining time is 0, set done field to 1, and update process completion info
+            // If remaining time is 0, set done field to 1, and update process completion info
             if (table[minArrivalTimeIndex].totalRemainingTime == 0) {
                 table[minArrivalTimeIndex].done = 1;
                 table[minArrivalTimeIndex].endTime = currentCycle; // set end time
@@ -234,14 +214,14 @@ void SRT(void) {
             currentCycle++;
         }
     }
-    
-    // print contents of table
+    // Print contents of table
     printSchedulingTable();
+    return;
 }
 
 //*************************************************************
 void option5(void) {
-    // free the schedule table if not NULL
+    // Free the schedule table if not NULL
     if (table != NULL) {
         free(table);
         table = NULL;
@@ -252,12 +232,11 @@ void option5(void) {
 
 //*************************************************************
 int main(void) {
-    // declare local vars
+    // Declare local vars
      int choice;
-    
-    // while user has not chosen to quit
+    // While user has not chosen to quit
     do {
-        // print menu of options
+        // Print menu of options
         printf("Batch scheduling\n");
         printf("----------------\n");
         printf("1) Enter parameters\n");
@@ -265,12 +244,10 @@ int main(void) {
         printf("3) Schedule processes with SJF algorithm\n");
         printf("4) Schedule processes with SRT algorithm\n");
         printf("5) Quit and free memory\n");
-       
-        // prompt for menu selection
+        // Prompt for menu selection
         printf("Enter selection: ");
         scanf("%d", &choice);
-
-        // call appropriate procedure based on choice--use switch statement or series of if, else if, else statements
+        // Call appropriate procedure based on choice--use switch statement or series of if, else if, else statements
         switch(choice) {
             case 1:
                 option1();
@@ -291,6 +268,5 @@ int main(void) {
             printf("Invalid option. Please try again.\n");
         }
     } while(choice != 5); // Loop until the user selects option 5. // while loop
-    
-     return 1; // indicates success
-} // end of procedure
+     return 0; // Indicates success
+} // End of procedure
